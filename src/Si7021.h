@@ -15,8 +15,20 @@
 extern "C" {
 #endif
 
+// Device I2C slave address
 #define SI7021_DEFAULT_ADDRESS 0x40
 
+// I2C mux channels that connect the sensors.
+// Be aware that the I2C mux only has 4 channels. Thus, only 4 of the same
+// sensors can be used. Currently, only two sensors are being used on channels
+// 0 and 1.
+#define TEMP_HUM_SENSOR_0 CHANNEL_0
+#define TEMP_HUM_SENSOR_1 CHANNEL_1
+#define TEMP_HUM_SENSOR_2 CHANNEL_2
+#define TEMP_HUM_SENSOR_3 CHANNEL_3
+
+    
+// Commands
 #define SI7021_MEASRH_HOLD_CMD                                                 \
   0xE5 /**< Measure Relative Humidity, Hold Master Mode */
 #define SI7021_MEASRH_NOHOLD_CMD                                               \
@@ -36,30 +48,15 @@ extern "C" {
 #define SI7021_ID1_CMD 0xFA0F           /**< Read Electronic ID 1st Byte */
 #define SI7021_ID2_CMD 0xFCC9           /**< Read Electronic ID 2nd Byte */
 #define SI7021_FIRMVERS_CMD 0x84B8      /**< Read Firmware Revision */
-
 #define SI7021_REV_1 0xff /**< Sensor revision 1 */
 #define SI7021_REV_2 0x20 /**< Sensor revision 2 */
+    
 
-/** An enum to represent the sensor heater heat levels **/
-enum si_heatLevel {
-    SI_HEATLEVEL_LOWEST = 0x00,
-    SI_HEATLEVEL_LOW = 0x01,
-    SI_HEATLEVEL_MEDIUM = 0x02,
-    SI_HEATLEVEL_HIGH = 0x04,
-    SI_HEATLEVEL_HIGHER = 0x08,
-    SI_HEATLEVEL_HIGHEST = 0x0F,
-};
-
-// Temperature sensors
-typedef enum {
-    TEMP_HUM_SENSOR_0,
-    TEMP_HUM_SENSOR_1
-} TempertaureHumiditySensor;
-
-void Si7021Reset(TempertaureHumiditySensor sensor);
-bool Si7021Begin(TempertaureHumiditySensor sensor);
-uint8_t readTemperature(TempertaureHumiditySensor sensor);
-uint8_t readHumidity(TempertaureHumiditySensor sensor);
+// Functions
+void Si7021Reset(I2CMuxChannel channel);
+bool Si7021Begin(I2CMuxChannel channel);
+uint8_t readTemperature(I2CMuxChannel channel);
+uint8_t readHumidity(I2CMuxChannel channel);
 
 #ifdef	__cplusplus
 }

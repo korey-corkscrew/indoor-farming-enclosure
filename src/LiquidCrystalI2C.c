@@ -1,6 +1,5 @@
 #include "LiquidCrystalI2C.h"
 
-
 uint8_t _addr;
 uint8_t _displayfunction;
 uint8_t _displaycontrol;
@@ -10,8 +9,13 @@ uint8_t _rows;
 uint8_t _charsize;
 uint8_t _backlightval;
 
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-void LCDInit( void ) {
+/**
+ * @def
+ */
+void LCDInit( I2CMuxChannel channel ) {
     _cols = 16;
     _rows = 2;
     _backlightval = LCD_BACKLIGHT;
@@ -20,204 +24,270 @@ void LCDInit( void ) {
     _displayfunction |= LCD_2LINE;
     CORETIMER_DelayMs( 50 );
     
-    LCDExpanderWrite( _backlightval );
+    LCDExpanderWrite( channel, _backlightval );
     CORETIMER_DelayMs( 1000 );
     
-    LCDWrite4Bits( 0x03 << 4 );
+    LCDWrite4Bits( channel, 0x03 << 4 );
     CORETIMER_DelayUs( 4500 );
     
-    LCDWrite4Bits( 0x03 << 4 );
+    LCDWrite4Bits( channel, 0x03 << 4 );
     CORETIMER_DelayUs( 4500 );
     
-    LCDWrite4Bits( 0x03 << 4 );
+    LCDWrite4Bits( channel, 0x03 << 4 );
     CORETIMER_DelayUs( 150 );
     
-    LCDWrite4Bits( 0x02 << 4 );
+    LCDWrite4Bits( channel, 0x02 << 4 );
     
-    LCDCommand( LCD_FUNCTIONSET | _displayfunction );
+    LCDCommand( channel, LCD_FUNCTIONSET | _displayfunction );
     
     _displaycontrol = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;
 	
-    LCDDisplay();
+    LCDDisplay(channel);
 
 	// clear it off
-	LCDClear();
+	LCDClear(channel);
 
 	// Initialize to default text direction (for roman languages)
 	_displaymode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT;
 
 	// set the entry mode
-	LCDCommand(LCD_ENTRYMODESET | _displaymode);
+	LCDCommand(channel, LCD_ENTRYMODESET | _displaymode);
 
-	LCDHome();
-    LCDBacklight();
-    LCDClear();
-    LCDBlink();
+    // Move cursor to 0, 0
+	LCDHome(channel);
+    
+    // Turn backlight on
+    LCDBacklight(channel);
+    
+    // Turn cursor blink on
+    LCDBlink(channel);
 }
 
-void LCDClear( void ) {
-    LCDCommand( LCD_CLEARDISPLAY );
+// -----------------------------------------------------------------------------
+
+/**
+ * @def
+ */
+void LCDClear( I2CMuxChannel channel ) {
+    LCDCommand( channel, LCD_CLEARDISPLAY );
     CORETIMER_DelayUs( 2000 );
 }
 
-void LCDHome( void ) {
-    LCDCommand( LCD_RETURNHOME );
+// -----------------------------------------------------------------------------
+
+/**
+ * @def
+ */
+void LCDHome( I2CMuxChannel channel ) {
+    LCDCommand( channel, LCD_RETURNHOME );
     CORETIMER_DelayUs( 2000 );
 }
 
-void LCDSetCursor( uint8_t col, uint8_t row ) {
+// -----------------------------------------------------------------------------
+
+/**
+ * @def
+ * @param col
+ * @param row
+ */
+void LCDSetCursor( I2CMuxChannel channel, uint8_t col, uint8_t row ) {
     uint8_t row_offsets[2] = { 0x00, 0x40 };
     if( row > 1 ) {
         row = 1;
     }
-    LCDCommand( LCD_SETDDRAMADDR | (col + row_offsets[row]) );
+    LCDCommand( channel, LCD_SETDDRAMADDR | (col + row_offsets[row]) );
 }
 
-// Turn the display on/off (quickly)
-void LCDNoDisplay( void ) {
+// -----------------------------------------------------------------------------
+
+/**
+ * @def Turn the display off
+ */
+void LCDNoDisplay( I2CMuxChannel channel ) {
 	_displaycontrol &= ~LCD_DISPLAYON;
-	LCDCommand(LCD_DISPLAYCONTROL | _displaycontrol);
+	LCDCommand(channel, LCD_DISPLAYCONTROL | _displaycontrol);
 }
-void LCDDisplay( void ) {
+
+// -----------------------------------------------------------------------------
+
+/**
+ * @def Turn the display on
+ */
+void LCDDisplay( I2CMuxChannel channel ) {
 	_displaycontrol |= LCD_DISPLAYON;
-	LCDCommand(LCD_DISPLAYCONTROL | _displaycontrol);
+	LCDCommand(channel, LCD_DISPLAYCONTROL | _displaycontrol);
 }
 
-// Turns the underline cursor on/off
-void LCDNoCursor() {
+// -----------------------------------------------------------------------------
+
+/**
+ * @def Turns the underline cursor off
+ */
+void LCDNoCursor( I2CMuxChannel channel ) {
 	_displaycontrol &= ~LCD_CURSORON;
-	LCDCommand(LCD_DISPLAYCONTROL | _displaycontrol);
+	LCDCommand(channel, LCD_DISPLAYCONTROL | _displaycontrol);
 }
-void LCDCursor() {
+
+// -----------------------------------------------------------------------------
+
+/**
+ * @def Turns the underline cursor on
+ */
+void LCDCursor( I2CMuxChannel channel ) {
 	_displaycontrol |= LCD_CURSORON;
-	LCDCommand(LCD_DISPLAYCONTROL | _displaycontrol);
+	LCDCommand(channel, LCD_DISPLAYCONTROL | _displaycontrol);
 }
 
-// Turn on and off the blinking cursor
-void LCDNoBlink() {
+// -----------------------------------------------------------------------------
+
+/**
+ * @def Turn off the blinking cursor
+ */
+void LCDNoBlink( I2CMuxChannel channel ) {
 	_displaycontrol &= ~LCD_BLINKON;
-	LCDCommand(LCD_DISPLAYCONTROL | _displaycontrol);
+	LCDCommand(channel, LCD_DISPLAYCONTROL | _displaycontrol);
 }
 
-void LCDBlink() {
+// -----------------------------------------------------------------------------
+
+/**
+ * @def Turn on the blinking cursor
+ */
+void LCDBlink( I2CMuxChannel channel ) {
 	_displaycontrol |= LCD_BLINKON;
-	LCDCommand(LCD_DISPLAYCONTROL | _displaycontrol);
+	LCDCommand(channel, LCD_DISPLAYCONTROL | _displaycontrol);
 }
+
+// -----------------------------------------------------------------------------
 
 // These commands scroll the display without changing the RAM
-void LCDScrollDisplayLeft(void) {
-	LCDCommand(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVELEFT);
+void LCDScrollDisplayLeft(I2CMuxChannel channel) {
+	LCDCommand(channel, LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVELEFT);
 }
-void LCDScrollDisplayRight(void) {
-	LCDCommand(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVERIGHT);
+
+// -----------------------------------------------------------------------------
+
+void LCDScrollDisplayRight(I2CMuxChannel channel) {
+	LCDCommand(channel, LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVERIGHT);
 }
+
+// -----------------------------------------------------------------------------
 
 // This is for text that flows Left to Right
-void LCDLeftToRight(void) {
+void LCDLeftToRight(I2CMuxChannel channel) {
 	_displaymode |= LCD_ENTRYLEFT;
-	LCDCommand(LCD_ENTRYMODESET | _displaymode);
+	LCDCommand(channel, LCD_ENTRYMODESET | _displaymode);
 }
+
+// -----------------------------------------------------------------------------
 
 // This is for text that flows Right to Left
-void LCDRightToLeft(void) {
+void LCDRightToLeft(I2CMuxChannel channel) {
 	_displaymode &= ~LCD_ENTRYLEFT;
-	LCDCommand(LCD_ENTRYMODESET | _displaymode);
+	LCDCommand(channel, LCD_ENTRYMODESET | _displaymode);
 }
+
+// -----------------------------------------------------------------------------
 
 // This will 'right justify' text from the cursor
-void LCDAutoscroll(void) {
+void LCDAutoscroll(I2CMuxChannel channel) {
 	_displaymode |= LCD_ENTRYSHIFTINCREMENT;
-	LCDCommand(LCD_ENTRYMODESET | _displaymode);
+	LCDCommand(channel, LCD_ENTRYMODESET | _displaymode);
 }
+
+// -----------------------------------------------------------------------------
 
 // This will 'left justify' text from the cursor
-void LCDNoAutoscroll(void) {
+void LCDNoAutoscroll(I2CMuxChannel channel) {
 	_displaymode &= ~LCD_ENTRYSHIFTINCREMENT;
-	LCDCommand(LCD_ENTRYMODESET | _displaymode);
+	LCDCommand(channel, LCD_ENTRYMODESET | _displaymode);
 }
+
+// -----------------------------------------------------------------------------
 
 // Turn the (optional) backlight off/on
-void LCDNoBacklight(void) {
+void LCDNoBacklight(I2CMuxChannel channel) {
 	_backlightval = LCD_NOBACKLIGHT;
-	LCDExpanderWrite(0);
+	LCDExpanderWrite(channel, 0);
 }
 
-void LCDBacklight(void) {
+// -----------------------------------------------------------------------------
+
+void LCDBacklight(I2CMuxChannel channel) {
 	_backlightval = LCD_BACKLIGHT;
-	LCDExpanderWrite(0);
+	LCDExpanderWrite(channel, 0);
 }
 
-bool LCDGetBacklight() {
-  return _backlightval == LCD_BACKLIGHT;
+// -----------------------------------------------------------------------------
+
+inline void LCDCommand(I2CMuxChannel channel, uint8_t value) {
+	LCDSend(channel, value, 0);
 }
 
+// -----------------------------------------------------------------------------
 
-/*********** mid level commands, for sending data/cmds */
-
-inline void LCDCommand(uint8_t value) {
-	LCDSend(value, 0);
-}
-
-inline size_t LCDWrite(uint8_t value) {
-	LCDSend(value, Rs);
+inline size_t LCDWrite(I2CMuxChannel channel, uint8_t value) {
+	LCDSend(channel, value, Rs);
 	return 1;
 }
 
-
-///************ low level data pushing commands **********/
+// -----------------------------------------------------------------------------
 
 // write either command or data
-void LCDSend(uint8_t value, uint8_t mode) {
+void LCDSend(I2CMuxChannel channel, uint8_t value, uint8_t mode) {
 	uint8_t highnib=value&0xf0;
 	uint8_t lownib=(value<<4)&0xf0;
-	LCDWrite4Bits((highnib)|mode);
-	LCDWrite4Bits((lownib)|mode);
+	LCDWrite4Bits(channel, (highnib)|mode);
+	LCDWrite4Bits(channel, (lownib)|mode);
 }
 
-void LCDWrite4Bits(uint8_t value) {
-	LCDExpanderWrite(value);
-	LCDPulseEnable(value);
+// -----------------------------------------------------------------------------
+
+void LCDWrite4Bits(I2CMuxChannel channel, uint8_t value) {
+	LCDExpanderWrite(channel, value);
+	LCDPulseEnable(channel, value);
 }
 
-void LCDExpanderWrite(uint8_t _data){
-    setI2CMuxChannel( CHANNEL_0 );
+// -----------------------------------------------------------------------------
+
+void LCDExpanderWrite(I2CMuxChannel channel, uint8_t _data){
     uint8_t buffer[1] = { _data | _backlightval };
-    I2C1Write( LCD_ADDRESS, buffer, 1 );
+    I2C1Write( channel, LCD_ADDRESS, buffer, 1 );
 }
 
-void LCDPulseEnable(uint8_t _data){
-	LCDExpanderWrite(_data | En);	// En high
+// -----------------------------------------------------------------------------
+
+void LCDPulseEnable(I2CMuxChannel channel, uint8_t _data){
+	LCDExpanderWrite(channel, _data | En);	// En high
 	CORETIMER_DelayUs(1);		// enable pulse must be >450ns
 
-	LCDExpanderWrite(_data & ~En);	// En low
+	LCDExpanderWrite(channel, _data & ~En);	// En low
 	CORETIMER_DelayUs(50);		// commands need > 37us to settle
 }
 
-void LCDSetBacklight(uint8_t new_val){
-	if (new_val) {
-		LCDBacklight();		// turn backlight on
-	} else {
-		LCDNoBacklight();		// turn backlight off
-	}
-}
+// -----------------------------------------------------------------------------
 
-void LCDPrint( int val ) {
+void LCDPrint( I2CMuxChannel channel, int val ) {
     char *string = itoa(val);
     for(int i = 0; i < sizeof(string); i++) {
         if(string[i] < 0x30 || string[i] > 0x39){
             return;
         }
-        LCDWrite(string[i]);
+        LCDWrite(channel, string[i]);
     }
 }
 
-void LCDPrintString( char *str ) {
+// -----------------------------------------------------------------------------
+
+void LCDPrintString( I2CMuxChannel channel, char *str ) {
     for(int i = 0; i < sizeof(str); i++) {
         if(str[i] > 0x20 || str[i] < 0x7E) {
-            LCDWrite(str[i]);
+            LCDWrite(channel, str[i]);
         }
     }
 }
+
+// -----------------------------------------------------------------------------
 
 /**
  * @def Converts an int to an array of characters

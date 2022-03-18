@@ -15,17 +15,27 @@
 extern "C" {
 #endif
 
+
+// Device I2C slave address
+#define TSL2591_ADDR (0x29)
     
-#define TSL2591_ADDR (0x29) ///< Default I2C address
+// I2C mux channels that connect the sensors.
+// Be aware that the I2C mux only has 4 channels. Thus, only 4 of the same
+// sensors can be used. Currently, only two sensors are being used on channels
+// 0 and 1.
+#define LUM_SENSOR_0 CHANNEL_0
+#define LUM_SENSOR_1 CHANNEL_1
+#define LUM_SENSOR_2 CHANNEL_2
+#define LUM_SENSOR_3 CHANNEL_3
 
-#define TSL2591_COMMAND_BIT                                                    \
-  (0xA0) ///< 1010 0000: bits 7 and 5 for 'command normal'
-
-///! Special Function Command for "Clear ALS and no persist ALS interrupt"
-#define TSL2591_CLEAR_INT (0xE7)
-///! Special Function Command for "Interrupt set - forces an interrupt"
-#define TSL2591_TEST_INT (0xE4)
-
+    
+// 1010 0000: bits 7 and 5 for 'command normal'
+#define TSL2591_COMMAND_BIT     0xA0
+// Special Function Command for "Clear ALS and no persist ALS interrupt"
+#define TSL2591_CLEAR_INT       0xE7
+// Special Function Command for "Interrupt set - forces an interrupt"
+#define TSL2591_TEST_INT        0xE4
+    
 #define TSL2591_WORD_BIT (0x20)  ///< 1 = read/write word (rather than byte)
 #define TSL2591_BLOCK_BIT (0x10) ///< 1 = using block read/write
 
@@ -121,23 +131,17 @@ typedef enum {
     TSL2591_VISIBLE
 } Channel;
 
-// Luminosity sensors
-typedef enum {
-    LUM_SENSOR_0,
-    LUM_SENSOR_1
-} LuminositySensor;
-
 extern tsl2591IntegrationTime_t _integration;
 extern tsl2591Gain_t _gain;
 
-void TSL2591Enable(LuminositySensor sensor);
-void TSL2591Disable(LuminositySensor sensor);
-bool TSL2591Begin(LuminositySensor sensor, tsl2591IntegrationTime_t integration, tsl2591Gain_t gain);
-void TSL2591SetGainTiming(LuminositySensor sensor, tsl2591Gain_t gain, tsl2591IntegrationTime_t integration);
-uint32_t TSL2591GetFullLuminosity(LuminositySensor sensor);
-uint16_t readLuminosity(LuminositySensor sensor, Channel channel);
+void TSL2591Enable(I2CMuxChannel channel);
+void TSL2591Disable(I2CMuxChannel channel);
+bool TSL2591Begin(I2CMuxChannel channel, tsl2591IntegrationTime_t integration, tsl2591Gain_t gain);
+void TSL2591SetGainTiming(I2CMuxChannel channel, tsl2591Gain_t gain, tsl2591IntegrationTime_t integration);
+uint32_t TSL2591GetFullLuminosity(I2CMuxChannel channel);
+uint16_t readLuminosity(I2CMuxChannel channel, Channel lumChannel);
 float TSL2591CalculateLux(uint16_t ch0, uint16_t ch1);
-float readLux( LuminositySensor sensor );
+float readLux(I2CMuxChannel channel);
 
 #ifdef	__cplusplus
 }

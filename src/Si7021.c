@@ -3,34 +3,27 @@
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 
-void Si7021Reset(TempertaureHumiditySensor sensor) {
-    switch (sensor) {
-        case TEMP_HUM_SENSOR_0:
-            setI2CMuxChannel(CHANNEL_0);
-            break;
-        case TEMP_HUM_SENSOR_1:
-            setI2CMuxChannel(CHANNEL_1);
-            break;
-    }
+/**
+ * @def
+ * @param sensor
+ */
+void Si7021Reset(I2CMuxChannel channel) {
     uint8_t buffer[1] = {SI7021_RESET_CMD};
-    I2C1Write(SI7021_DEFAULT_ADDRESS, buffer, 1);
+    I2C1Write(channel, SI7021_DEFAULT_ADDRESS, buffer, 1);
     CORETIMER_DelayMs(50);
 }
 
 // -----------------------------------------------------------------------------
 
-bool Si7021Begin(TempertaureHumiditySensor sensor) {
-    switch (sensor) {
-        case TEMP_HUM_SENSOR_0:
-            setI2CMuxChannel(CHANNEL_0);
-            break;
-        case TEMP_HUM_SENSOR_1:
-            setI2CMuxChannel(CHANNEL_1);
-            break;
-    }
-    Si7021Reset(sensor);
+/**
+ * @def
+ * @param sensor
+ * @return 
+ */
+bool Si7021Begin(I2CMuxChannel channel) {
+    Si7021Reset(channel);
     uint8_t buffer[1] = {SI7021_READRHT_REG_CMD};
-    I2C1WriteRead(SI7021_DEFAULT_ADDRESS, buffer, 1, buffer, 1);
+    I2C1WriteRead(channel, SI7021_DEFAULT_ADDRESS, buffer, 1, buffer, 1);
     if (buffer[0] != 0x3A) {
         return false;
     }
@@ -39,25 +32,18 @@ bool Si7021Begin(TempertaureHumiditySensor sensor) {
 
 // -----------------------------------------------------------------------------
 
-uint8_t readTemperature(TempertaureHumiditySensor sensor) {
-    // Select I2C mux channel
-    switch (sensor) {
-        case TEMP_HUM_SENSOR_0:
-            // Set I2C mux to channel 0
-            setI2CMuxChannel(CHANNEL_0);
-            break;
-        case TEMP_HUM_SENSOR_1:
-            // Set I2C mux to channel 1
-            setI2CMuxChannel(CHANNEL_1);
-            break;
-    }
-
+/**
+ * @def
+ * @param sensor
+ * @return 
+ */
+uint8_t readTemperature(I2CMuxChannel channel) {
     // Begin temperature reading
     uint8_t buffer[3] = {SI7021_MEASTEMP_NOHOLD_CMD, 0, 0};
-    I2C1Write(SI7021_DEFAULT_ADDRESS, buffer, 1);
+    I2C1Write(channel, SI7021_DEFAULT_ADDRESS, buffer, 1);
 
     // Read current temperature from sensor
-    I2C1Read(SI7021_DEFAULT_ADDRESS, buffer, 3);
+    I2C1Read(channel, SI7021_DEFAULT_ADDRESS, buffer, 3);
     uint16_t temp = buffer[0] << 8 | buffer[1];
 
     // Convert to ^F
@@ -73,25 +59,18 @@ uint8_t readTemperature(TempertaureHumiditySensor sensor) {
 
 // -----------------------------------------------------------------------------
 
-uint8_t readHumidity(TempertaureHumiditySensor sensor) {
-    // Select I2C mux channel
-    switch (sensor) {
-        case TEMP_HUM_SENSOR_0:
-            // Set I2C mux to channel 0
-            setI2CMuxChannel(CHANNEL_0);
-            break;
-        case TEMP_HUM_SENSOR_1:
-            // Set I2C mux to channel 1
-            setI2CMuxChannel(CHANNEL_1);
-            break;
-    }
-
+/**
+ * @def
+ * @param sensor
+ * @return 
+ */
+uint8_t readHumidity(I2CMuxChannel channel) {
     // Begin humidity reading
     uint8_t buffer[3] = {SI7021_MEASRH_NOHOLD_CMD, 0, 0};
-    I2C1Write(SI7021_DEFAULT_ADDRESS, buffer, 1);
+    I2C1Write(channel, SI7021_DEFAULT_ADDRESS, buffer, 1);
 
     // Read current humidity from sensor
-    I2C1Read(SI7021_DEFAULT_ADDRESS, buffer, 3);
+    I2C1Read(channel, SI7021_DEFAULT_ADDRESS, buffer, 3);
     uint16_t hum = buffer[0] << 8 | buffer[1];
 
     float humidity = hum;

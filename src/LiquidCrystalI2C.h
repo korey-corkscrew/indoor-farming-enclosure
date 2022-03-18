@@ -15,8 +15,20 @@
 extern "C" {
 #endif
 
+// LCD I2C device address
 #define LCD_ADDRESS 0x27
-// commands
+
+// I2C mux channel LCD is connected to.
+// Be aware that the I2C mux only has 4 channels. Thus, only 4 of the same
+// LCDs can be used. Currently, only one LCD is being used on channel 0. 
+// Realistically, this is used to allow the user to easily switch which I2C mux 
+// channel the LCD is connected to instead of supporting multiple LCDs.
+#define LCD_0 CHANNEL_0
+#define LCD_1 CHANNEL_1
+#define LCD_2 CHANNEL_2
+#define LCD_3 CHANNEL_3
+    
+// Commands
 #define LCD_CLEARDISPLAY 0x01
 #define LCD_RETURNHOME 0x02
 #define LCD_ENTRYMODESET 0x04
@@ -63,34 +75,33 @@ extern "C" {
 #define Rs 0x01 // 00000001B  // Register select bit
 
     
-void LCDInit( void );
-void LCDClear( void );
-void LCDHome( void );
-void LCDSetCursor( uint8_t col, uint8_t row );
-void LCDNoDisplay( void );
-void LCDDisplay( void );
-void LCDNoCursor();
-void LCDCursor();
-void LCDNoBlink();
-void LCDBlink();
-void LCDScrollDisplayLeft(void);
-void LCDScrollDisplayRight(void);
-void LCDLeftToRight(void);
-void LCDRightToLeft(void);
-void LCDAutoscroll(void);
-void LCDNoAutoscroll(void);
-void LCDNoBacklight(void);
-void LCDBacklight(void);
-bool LCDGetBacklight();
-void LCDCommand(uint8_t value);
-size_t LCDWrite(uint8_t value);
-void LCDSend(uint8_t value, uint8_t mode);
-void LCDWrite4Bits(uint8_t value);
-void LCDExpanderWrite(uint8_t _data);
-void LCDPulseEnable(uint8_t _data);
-void LCDSetBacklight(uint8_t new_val);
-void LCDPrint( int val );
-void LCDPrintString( char *str );
+void LCDInit( I2CMuxChannel channel );
+void LCDClear( I2CMuxChannel channel );
+void LCDHome( I2CMuxChannel channel );
+void LCDSetCursor( I2CMuxChannel channel, uint8_t col, uint8_t row );
+void LCDNoDisplay( I2CMuxChannel channel );
+void LCDDisplay( I2CMuxChannel channel );
+void LCDNoCursor(I2CMuxChannel channel);
+void LCDCursor(I2CMuxChannel channel);
+void LCDNoBlink(I2CMuxChannel channel);
+void LCDBlink(I2CMuxChannel channel);
+void LCDScrollDisplayLeft(I2CMuxChannel channel);
+void LCDScrollDisplayRight(I2CMuxChannel channel);
+void LCDLeftToRight(I2CMuxChannel channel);
+void LCDRightToLeft(I2CMuxChannel channel);
+void LCDAutoscroll(I2CMuxChannel channel);
+void LCDNoAutoscroll(I2CMuxChannel channel);
+void LCDNoBacklight(I2CMuxChannel channel);
+void LCDBacklight(I2CMuxChannel channel);
+void LCDCommand(I2CMuxChannel channel, uint8_t value);
+size_t LCDWrite(I2CMuxChannel channel, uint8_t value);
+void LCDSend(I2CMuxChannel channel, uint8_t value, uint8_t mode);
+void LCDWrite4Bits(I2CMuxChannel channel, uint8_t value);
+void LCDExpanderWrite(I2CMuxChannel channel, uint8_t _data);
+void LCDPulseEnable(I2CMuxChannel channel, uint8_t _data);
+void LCDSetBacklight(I2CMuxChannel channel, uint8_t new_val);
+void LCDPrint( I2CMuxChannel channel, int val );
+void LCDPrintString( I2CMuxChannel channel, char *str );
 char *itoa(int value);
 
 #ifdef	__cplusplus

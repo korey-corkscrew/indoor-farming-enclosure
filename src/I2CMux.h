@@ -19,7 +19,7 @@ extern "C" {
 #define I2C_MUX_A1              GPIO_PIN_RE0
 
 #define I2C_MUX_ADDRESS         0x70
-
+    
 // I2C master mux channels
 typedef enum {
     CHANNEL_0,
@@ -30,9 +30,9 @@ typedef enum {
 
 extern I2CMuxChannel currentChannel;
 
-void I2C1Write(uint16_t address, uint8_t* wdata, size_t wlength);
-void I2C1Read(uint16_t address, uint8_t* rdata, size_t rlength);
-void I2C1WriteRead(uint16_t address, uint8_t* wdata, size_t wlength, uint8_t* rdata, size_t rlength);
+void I2C1Write(I2CMuxChannel channel, uint16_t address, uint8_t* wdata, size_t wlength);
+void I2C1Read(I2CMuxChannel channel, uint16_t address, uint8_t* rdata, size_t rlength);
+void I2C1WriteRead(I2CMuxChannel channel, uint16_t address, uint8_t* wdata, size_t wlength, uint8_t* rdata, size_t rlength);
 void setI2CMuxChannel(I2CMuxChannel channel);
 void I2CMuxInit(void);
 

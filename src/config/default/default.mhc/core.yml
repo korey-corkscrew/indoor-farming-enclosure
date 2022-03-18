@@ -1382,28 +1382,28 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: 'true'}
+        attributes: {id: mcpwm, value: 'false'}
   - type: Integer
     attributes: {id: MCPWM5_CLOCK_FREQUENCY}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '120000000'}
+        attributes: {id: core, value: '0'}
   - type: Boolean
     attributes: {id: MCPWM6_CLOCK_ENABLE}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: 'true'}
+        attributes: {id: mcpwm, value: 'false'}
   - type: Integer
     attributes: {id: MCPWM6_CLOCK_FREQUENCY}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '120000000'}
+        attributes: {id: core, value: '0'}
   - type: Integer
     attributes: {id: MCPWM7_CLOCK_FREQUENCY}
     children:
@@ -1522,7 +1522,7 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '265224703'}
+        attributes: {id: core, value: '268370431'}
   - type: Hex
     attributes: {id: PMD5_REG_VALUE}
     children:
